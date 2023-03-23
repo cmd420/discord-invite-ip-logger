@@ -24,6 +24,7 @@ def post_ip(ip_addr):
             }
         ]
     }
+    
     # you can add more like pull out location
     requests.post(WEBHOOK_LINK, json={'embeds': [embed]}, timeout=10)
 
