@@ -41,7 +41,11 @@ def invite():
     Logs the visitor's ip, sends it to discord 
     via webhooks and redirects to the invite link
     '''
-    ip_addr = request.remote_addr
+    if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
+        ip_addr = request.environ['HTTP_X_REAL_IP']
+    else: 
+        ip_addr = request.environ['HTTP_X_FORWARDED_FOR']
+    
     Thread(target=post_ip, args=(ip_addr,)).start()
 
     return redirect(INVITE_LINK)
