@@ -1,5 +1,5 @@
 '''
-Defines the abstract class used to 
+Defines the abstract class used to define ip lookup services
 '''
 from abc import ABC, abstractclassmethod
 
