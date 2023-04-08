@@ -19,6 +19,6 @@ class IpApi(IpLookup):
             return field
 
         field["value"] = f'IP: {self.ip_addr}\nCountry: {data["country"]}\nCity: {data["city"]}\n' + \
-            f'Lat, Lon: {data["lat"]}, {data["lon"]}\n Timezone: {data["timezone"]}\n ISP: {data["isp"]}'
+            f'Lat, Lon: {data["lat"]}, {data["lon"]}\nTimezone: {data["timezone"]}\nISP: {data["isp"]}'
 
         return field

