@@ -1,4 +1,4 @@
-<h1 style="text-align: center;">DISCORD INVITE IP LOGGER</h1>
+<h1 align="center">DISCORD INVITE IP LOGGER</h1>
 Redirect IP logger using flask. Ideally hosted on replit.
 
 <br>
